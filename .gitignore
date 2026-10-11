@@ -1,0 +1,24 @@
+# Vendor images (proprietary, never publish)
+*.image
+*.bin
+*.qcow2
+*.vmdk
+*.ova
+*.iso
+*.tgz
+*.tar.gz
+*.zip
+
+# License files
+IOURC
+iourc
+*.lic
+
+# GNS3 project internals (large, machine-specific)
+project-files/
+*.gns3project
+*.gns3
+
+# Operating system junk
+.DS_Store
+Thumbs.db

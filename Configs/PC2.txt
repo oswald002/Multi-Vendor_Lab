@@ -1,0 +1,12 @@
+
+PC2> sh ip
+
+NAME        : PC2[1]
+IP/MASK     : 10.1.20.10/24
+GATEWAY     : 10.1.20.1
+DNS         :
+MAC         : 00:50:79:66:68:01
+LPORT       : 20056
+RHOST:PORT  : 127.0.0.1:20057
+MTU         : 1500
+
