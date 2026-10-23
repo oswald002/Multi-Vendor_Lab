@@ -1,0 +1,45 @@
+BranchB-CX# sh run
+Current configuration:
+!
+!Version ArubaOS-CX Virtual.10.07.0004
+!export-password: default
+hostname BranchB-CX
+led locator on
+!
+!
+!
+!
+!
+!
+ssh server vrf mgmt
+vlan 1,10
+interface mgmt
+    no shutdown
+    ip dhcp
+interface 1/1/1
+    no shutdown
+    description TO-ISP
+    ip address 172.16.3.1/30
+interface 1/1/2
+    no shutdown
+    description PC3
+    no routing
+    vlan access 10
+interface loopback 0
+    ip address 10.255.0.3/32
+interface vlan 10
+    ip address 10.3.0.1/24
+!
+!
+!
+!
+!
+router bgp 65003
+    bgp router-id 10.255.0.3
+    neighbor 172.16.3.2 remote-as 65000
+    address-family ipv4 unicast
+        neighbor 172.16.3.2 activate
+        network 10.3.0.0/24
+    exit-address-family
+!
+https-server vrf mgmt

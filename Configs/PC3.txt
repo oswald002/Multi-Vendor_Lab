@@ -1,0 +1,12 @@
+
+PC3> sh ip
+
+NAME        : PC3[1]
+IP/MASK     : 10.3.0.10/24
+GATEWAY     : 10.3.0.1
+DNS         :
+MAC         : 00:50:79:66:68:02
+LPORT       : 20098
+RHOST:PORT  : 127.0.0.1:20099
+MTU         : 1500
+

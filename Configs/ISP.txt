@@ -1,0 +1,39 @@
+
+[admin@ISP] > export hide-sensitive
+# 2026-10-22 05:52:28 by RouterOS 7.22.1
+# system id = Vv52X//RfIF
+#
+/interface bridge
+add name=lo0
+/interface ethernet
+set [ find default-name=ether1 ] disable-running-check=no
+set [ find default-name=ether2 ] disable-running-check=no
+set [ find default-name=ether3 ] disable-running-check=no
+set [ find default-name=ether4 ] disable-running-check=no
+set [ find default-name=ether5 ] disable-running-check=no
+set [ find default-name=ether6 ] disable-running-check=no
+set [ find default-name=ether7 ] disable-running-check=no
+set [ find default-name=ether8 ] disable-running-check=no
+/routing bgp instance
+add as=65000 name=default
+/routing bgp template
+set default as=65000
+/ip address
+add address=172.16.1.2/30 interface=ether1 network=172.16.1.0
+add address=172.16.2.2/30 interface=ether2 network=172.16.2.0
+add address=172.16.3.2/30 interface=ether3 network=172.16.3.0
+add address=198.51.100.1 interface=lo0 network=198.51.100.1
+/ip dhcp-client
+add interface=ether1 name=client1
+/ip firewall address-list
+add list=ISP-NETS
+add address=198.51.100.1 list=ISP-NETS
+/routing bgp connection
+add hold-time=30s instance=default keepalive-time=10s local.role=ebgp name=\
+    to-R1 output.network=ISP-NETS remote.address=172.16.1.1 .as=65001
+add hold-time=30s instance=default keepalive-time=10s local.role=ebgp name=\
+    to-R2 output.network=ISP-NETS remote.address=172.16.2.1 .as=65001
+add instance=default local.role=ebgp name=to-BranchB output.network=ISP-NETS \
+    remote.address=172.16.3.1 .as=65003
+/system identity
+set name=ISP
