@@ -100,7 +100,7 @@ Flags: S - SEEN-TRAFFIC; H - HW-AEAD; A - AH, E - ESP
        enc-key-size=256 addtime=2026-10-26 10:18:45 expires-in=48m
        add-lifetime=48m23s/1h29s current-bytes=1260 current-packets=15
        replay=128
-!(ikev2-ipsec-sa)[../Docs/ikev2-ipsec-sa.png)
+!(ikev2 ipsec sa)[ikev2-ipsec-sa.png)
 ```
 
 **Result:** The IKEv2 SA is in the READY state on the ASAv, and the MikroTik reports the peer as established with one phase 2 SA. Both ESP SAs use AES-256 with SHA-256 and are mature. Pings pass in both directions between PC4 and PC5. Encapsulated, decapsulated, decrypted and verified packet counters all increase on the ASAv. 
@@ -113,7 +113,7 @@ An earlier test showed the tunnel established with matching SPIs but no traffic 
 **Method:** packet capture on the ASAv outside interface (the GNS3 live capture to Wireshark failed with a pipe error), filtered to the two tunnel endpoints, while PC4 pinged PC5.
 **Command:** `capture OUT-CAP interface outside match ip host 172.16.4.1 host 172.16.5.1`
 
-![Packet capture](../diagrams/phase3-esp-capture.png)
+![Packet capture](diagrams/phase3-esp-capture.png)
 
 **Result:** Between 172.16.4.1 and 172.16.5.1 the capture shows ESP (IP protocol 50) in both directions, alternating about once per second as the pings and their replies cross the tunnel, plus IKE signalling and keepalives on UDP 4500. The data is carried as raw ESP, not wrapped in UDP. No ICMP appears on the wire, so the ping traffic is encrypted. The ESP packets in the capture are all 136 bytes.
 
