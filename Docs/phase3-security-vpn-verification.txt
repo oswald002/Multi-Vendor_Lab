@@ -100,7 +100,7 @@ Flags: S - SEEN-TRAFFIC; H - HW-AEAD; A - AH, E - ESP
        enc-key-size=256 addtime=2026-10-26 10:18:45 expires-in=48m
        add-lifetime=48m23s/1h29s current-bytes=1260 current-packets=15
        replay=128
-!(ikev2-ipsec-sa)[Docs/ikev2-ipsec-sa.png)
+!(ikev2-ipsec-sa)[../Docs/ikev2-ipsec-sa.png)
 ```
 
 **Result:** The IKEv2 SA is in the READY state on the ASAv, and the MikroTik reports the peer as established with one phase 2 SA. Both ESP SAs use AES-256 with SHA-256 and are mature. Pings pass in both directions between PC4 and PC5. Encapsulated, decapsulated, decrypted and verified packet counters all increase on the ASAv. 
