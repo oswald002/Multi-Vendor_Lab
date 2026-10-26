@@ -9,7 +9,7 @@
 - BranchA-RTR: `/ping 172.16.4.1`
 
 ```
-![ASAv verification step 1](Docs/ASAv_verification_step1.png)
+![ASAv verification step 1](ASAv_verification_step1.png)
 
 
 [admin@BranchA-RTR] > ping 172.16.4.1
@@ -33,8 +33,8 @@
 - ASAv: `show xlate` and `show nat detail`, run immediately after the ping (dynamic entries expire quickly)
 
 ```
-![ASAV_show_xlate](Docs/ASAV_show_xlate.png)
-![ASAv_nat_detail](Docs/ASAv_nat_detail.png)
+![ASAV_show_xlate](ASAV_show_xlate.png)
+![ASAv_nat_detail](ASAv_nat_detail.png)
 
 ```
 
@@ -131,7 +131,7 @@ NAT from outside:10.2.0.0/24 to inside:10.2.0.0/24
     flags sIT idle 1:11:36 timeout 0:00:00
 
 
-!(sh-nat-detail-asav](Docs/sh-nat-detail-asav.png)
+!(sh-nat-detail-asav](sh-nat-detail-asav.png)
 ```
 
 **Result:** The identity (twice) NAT rule maps the inside network to itself for traffic going to 10.2.0.0/24, and the reverse. The flags show static, identity and twice NAT. The VPN traffic therefore keeps its real addresses and matches the VPN-TRAFFIC ACL, rather than being translated to the outside interface address.
