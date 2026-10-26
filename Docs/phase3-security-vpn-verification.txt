@@ -1,0 +1,142 @@
+# Phase 3: Perimeter Security and Site-to-Site VPN Verification
+
+**Summary:** The ASAv provides NAT and stateful zone filtering for the HQ server and DMZ segments, and an IKEv2/AES-256 IPsec tunnel to a MikroTik router at Branch A carries traffic between 10.4.1.0/24 and 10.2.0.0/24. On the ISP link the traffic appears only as ESP.
+
+## 1. Addressing and reachability
+**Goal:** all interfaces are up, and both VPN peers can reach each other through the ISP.
+**Commands:**
+- ASAv: `show interface ip brief`, `ping outside 172.16.4.2`, `ping outside 172.16.5.1`
+- BranchA-RTR: `/ping 172.16.4.1`
+
+```
+![ASAv verification step 1](Docs/ASAv_verification_step1.png)
+
+
+[admin@BranchA-RTR] > ping 172.16.4.1
+  SEQ HOST                                     SIZE TTL TIME       STATUS
+    0 172.16.4.1                                 56 254 5ms750us
+    1 172.16.4.1                                 56 254 3ms788us
+    2 172.16.4.1                                 56 254 4ms340us
+    3 172.16.4.1                                 56 254 2ms937us
+    4 172.16.4.1                                 56 254 4ms30us
+    sent=5 received=5 packet-loss=0% min-rtt=2ms937us avg-rtt=4ms169us
+   max-rtt=5ms750us
+
+```
+
+**Result:** The three ASAv interfaces (outside 172.16.4.1/30, inside 10.4.1.1/24, dmz 10.4.2.1/24) are up with the planned addresses. The ASAv reaches the ISP and the Branch A router, and the Branch A router reaches the ASAv's outside address, so the ISP forwards between its two new subnets and the peers can exchange IKE traffic.
+
+## 2. NAT to the internet
+**Goal:** inside hosts reach the simulated internet address through dynamic NAT on the ASAv.
+**Commands:**
+- PC4: `ping 198.51.100.1`
+- ASAv: `show xlate` and `show nat detail`, run immediately after the ping (dynamic entries expire quickly)
+
+```
+![ASAV_show_xlate](Docs/ASAV_show_xlate.png)
+![ASAv_nat_detail](Docs/ASAv_nat_detail.png)
+
+```
+
+**Result:** PC4 reaches 198.51.100.1 through the ASAv. The dynamic rule translates the inside network to the ASAv's outside address (172.16.4.1), so the ISP only ever sees that address. `<confirm: xlate shows the dynamic entry for 10.4.1.10 while the ping runs>`
+
+## 3. DMZ policy
+**Goal:** the DMZ can reach the internet but is blocked from the inside network, and the ACL records both outcomes.
+**Commands:**
+- PC6: `ping 198.51.100.1`, then `ping 10.4.1.10`
+- ASAv: `show access-list DMZ-IN`
+
+```
+HQ-FW# show access-list DMZ-IN
+access-list DMZ-IN; 2 elements; name hash: 0x33999acc
+access-list DMZ-IN line 1 extended deny ip 10.4.2.0 255.255.255.0 10.4.1.0 255.255.255.0 log informational interval 300 (hitcnt=5)
+access-list DMZ-IN line 2 extended permit icmp 10.4.2.0 255.255.255.0 any (hitcnt=5)
+```
+
+**Result:** PC6's five pings to the internet matched the permit rule (5 hits) and its five pings toward the inside host were dropped by the deny rule (5 hits). The hit counts match the number of pings sent, so the policy behaves as designed in both directions. The deny rule logs each drop.
+
+## 4. Tunnel established
+**Goal:** the IKEv2 tunnel between the ASAv (172.16.4.1) and the MikroTik router (172.16.5.1) is up and carries traffic in both directions.
+**Commands:**
+- PC4: `ping 10.2.0.10`, PC5: `ping 10.4.1.10`
+- ASAv: `show crypto ikev2 sa`, `show crypto ipsec sa | include pkts|spi`
+- BranchA-RTR: `/ip ipsec active-peers print`, `/ip ipsec installed-sa print detail`
+
+```
+
+PC4> ping 10.2.0.10
+
+84 bytes from 10.2.0.10 icmp_seq=1 ttl=63 time=7.071 ms
+84 bytes from 10.2.0.10 icmp_seq=2 ttl=63 time=4.470 ms
+84 bytes from 10.2.0.10 icmp_seq=3 ttl=63 time=7.331 ms
+84 bytes from 10.2.0.10 icmp_seq=4 ttl=63 time=7.194 ms
+84 bytes from 10.2.0.10 icmp_seq=5 ttl=63 time=5.323 ms
+
+
+
+PC5> ping 10.4.1.10
+
+84 bytes from 10.4.1.10 icmp_seq=1 ttl=63 time=7.176 ms
+84 bytes from 10.4.1.10 icmp_seq=2 ttl=63 time=7.095 ms
+84 bytes from 10.4.1.10 icmp_seq=3 ttl=63 time=6.838 ms
+84 bytes from 10.4.1.10 icmp_seq=4 ttl=63 time=3.632 ms
+84 bytes from 10.4.1.10 icmp_seq=5 ttl=63 time=6.138 ms
+
+
+
+[admin@BranchA-RTR] > ip ipsec active-peers print
+Columns: ID, STATE, UPTIME, PH2-TOTAL, REMOTE-ADDRESS
+# ID          STATE        UPTIME  PH2-TOTAL  REMOTE-ADDRESS
+0 172.16.4.1  established  12m14s          1  172.16.4.1
+[admin@BranchA-RTR] > ip ipsec installed-sa print detail
+Flags: S - SEEN-TRAFFIC; H - HW-AEAD; A - AH, E - ESP
+ 0 S E spi=0x9688E94 src-address=172.16.4.1 dst-address=172.16.5.1 state=mature
+       auth-algorithm=sha256 enc-algorithm=aes-cbc enc-key-size=256
+       addtime=2026-10-26 10:18:45 expires-in=48m add-lifetime=48m23s/1h29s
+       current-bytes=1260 current-packets=15 replay=128
+
+ 1 S E spi=0xA69C8AE7 src-address=172.16.5.1 dst-address=172.16.4.1
+       state=mature auth-algorithm=sha256 enc-algorithm=aes-cbc
+       enc-key-size=256 addtime=2026-10-26 10:18:45 expires-in=48m
+       add-lifetime=48m23s/1h29s current-bytes=1260 current-packets=15
+       replay=128
+!(ikev2-ipsec-sa)[Docs/ikev2-ipsec-sa.png)
+```
+
+**Result:** The IKEv2 SA is in the READY state on the ASAv, and the MikroTik reports the peer as established with one phase 2 SA. Both ESP SAs use AES-256 with SHA-256 and are mature. Pings pass in both directions between PC4 and PC5. Encapsulated, decapsulated, decrypted and verified packet counters all increase on the ASAv. 
+
+
+An earlier test showed the tunnel established with matching SPIs but no traffic passing: the ASAv counted encapsulated packets and received packets that were never decrypted. Flushing the SAs on both sides and re-negotiating fixed it without changing any algorithm. See entries 16 and 17 of the [troubleshooting log](troubleshooting-log.md).
+
+## 5. Traffic is encrypted
+**Goal:** show that traffic between the sites is encrypted on the ISP link.
+**Method:** packet capture on the ASAv outside interface (the GNS3 live capture to Wireshark failed with a pipe error), filtered to the two tunnel endpoints, while PC4 pinged PC5.
+**Command:** `capture OUT-CAP interface outside match ip host 172.16.4.1 host 172.16.5.1`
+
+![Packet capture](../diagrams/phase3-esp-capture.png)
+
+**Result:** Between 172.16.4.1 and 172.16.5.1 the capture shows ESP (IP protocol 50) in both directions, alternating about once per second as the pings and their replies cross the tunnel, plus IKE signalling and keepalives on UDP 4500. The data is carried as raw ESP, not wrapped in UDP. No ICMP appears on the wire, so the ping traffic is encrypted. The ESP packets in the capture are all 136 bytes.
+
+## 6. NAT exemption
+**Goal:** traffic for the VPN is not translated by the ASAv.
+**Commands:**
+- PC4: `ping 10.2.0.10`
+- ASAv: `show xlate`, `show nat detail`
+
+```
+HQ-FW# show xlate
+NAT from inside:10.4.1.0/24 to outside:10.4.1.0/24
+    flags sIT idle 1:11:36 timeout 0:00:00
+NAT from outside:10.2.0.0/24 to inside:10.2.0.0/24
+    flags sIT idle 1:11:36 timeout 0:00:00
+
+
+!(sh-nat-detail-asav](Docs/sh-nat-detail-asav.png)
+```
+
+**Result:** The identity (twice) NAT rule maps the inside network to itself for traffic going to 10.2.0.0/24, and the reverse. The flags show static, identity and twice NAT. The VPN traffic therefore keeps its real addresses and matches the VPN-TRAFFIC ACL, rather than being translated to the outside interface address.
+## Design notes
+- IKEv2 with AES-256, SHA-256 and DH group 14 on both peers, authenticated with a pre-shared key (not recorded in this repository).
+- The HQ side of the VPN is a server and DMZ segment behind the ASAv, kept separate from the campus network built in Phases 1 and 2. This avoids re-architecting the working BGP design.
+- Branch A uses a MikroTik CHR with static routing. A FortiGate VM was tried first, but an unlicensed FortiGate VM offers only DES for IPsec (see the troubleshooting log).
+- The ASAv runs without a Smart License, which limits its throughput, so these tests demonstrate function rather than performance.

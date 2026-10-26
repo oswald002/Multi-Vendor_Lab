@@ -1,0 +1,12 @@
+
+PC4> sh ip
+
+NAME        : PC4[1]
+IP/MASK     : 10.4.1.10/24
+GATEWAY     : 10.4.1.1
+DNS         :
+MAC         : 00:50:79:66:68:03
+LPORT       : 20092
+RHOST:PORT  : 127.0.0.1:20093
+MTU         : 1500
+

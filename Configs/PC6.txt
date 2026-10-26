@@ -1,0 +1,12 @@
+
+PC6> sh ip
+
+NAME        : PC6[1]
+IP/MASK     : 10.4.2.10/24
+GATEWAY     : 10.4.2.1
+DNS         :
+MAC         : 00:50:79:66:68:00
+LPORT       : 20094
+RHOST:PORT  : 127.0.0.1:20095
+MTU         : 1500
+

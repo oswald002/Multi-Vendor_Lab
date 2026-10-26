@@ -1,0 +1,11 @@
+PC5> sh ip
+
+NAME        : PC5[1]
+IP/MASK     : 10.2.0.10/24
+GATEWAY     : 10.2.0.1
+DNS         :
+MAC         : 00:50:79:66:68:05
+LPORT       : 20096
+RHOST:PORT  : 127.0.0.1:20097
+MTU         : 1500
+

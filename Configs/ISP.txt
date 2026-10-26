@@ -1,6 +1,7 @@
 
+
 [admin@ISP] > export hide-sensitive
-# 2026-10-22 05:52:28 by RouterOS 7.22.1
+# 2026-10-26 09:27:46 by RouterOS 7.22.1
 # system id = Vv52X//RfIF
 #
 /interface bridge
@@ -23,6 +24,8 @@ add address=172.16.1.2/30 interface=ether1 network=172.16.1.0
 add address=172.16.2.2/30 interface=ether2 network=172.16.2.0
 add address=172.16.3.2/30 interface=ether3 network=172.16.3.0
 add address=198.51.100.1 interface=lo0 network=198.51.100.1
+add address=172.16.4.2/30 interface=ether4 network=172.16.4.0
+add address=172.16.5.2/30 interface=ether5 network=172.16.5.0
 /ip dhcp-client
 add interface=ether1 name=client1
 /ip firewall address-list

@@ -178,3 +178,25 @@ Problems met while building the lab, how each was investigated, and what was lea
 
 \- \*\*Lesson:\*\* use the route table as the primary evidence and treat summary counters as supporting information.
 
+
+
+
+### 13. FortiGate VM offered only DES for IPsec
+- **Symptom:** `set proposal` on the FortiGate listed only des-* options.
+- **Investigation:** checked vendor documentation and forum reports.
+- **Root cause:** the unlicensed FortiGate VM runs in low-encryption mode.
+- **Fix:** replaced the FortiGate with a MikroTik CHR as the VPN peer, which supports AES-256 without a license.
+- **Lesson:** check a platform's crypto and license limits before designing a VPN around it.
+
+### 14. Ping to 192.51.100.1 timed out from PC4
+- **Symptom:** PC4 could not reach the ISP's simulated internet address.
+- **Root cause:** the address was mistyped as 192.51.100.1 instead of 198.51.100.1.
+- **Fix:** pinged the correct address.
+- **Lesson:** double-check the address before troubleshooting the network.
+
+
+### 15. Wireshark live capture from GNS3 failed
+- **Symptom:** starting a capture on the link opened Wireshark with "End of file on pipe magic during open", or opened the interface list instead of the capture.
+- **Root cause:** not determined. The live pipe between GNS3 and Wireshark closed before any data arrived.
+- **Fix:** captured on the ASAv's outside interface instead.
+- **Lesson:** devices with a built-in packet capture give an alternative when the lab tooling fails.
