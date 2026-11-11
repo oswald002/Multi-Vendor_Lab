@@ -166,3 +166,10 @@ Problems met while building the lab, how each was investigated, and what was lea
 - **Root cause:** not determined. The live pipe between GNS3 and Wireshark closed before any data arrived.
 - **Fix:** captured on the ASAv's outside interface instead.
 - **Lesson:** devices with a built-in packet capture give an alternative when the lab tooling fails.
+
+
+### 16. Branch A PC could ping an inside host but not the ASAv's inside interface
+- **Symptom:** PC5 reached PC4 (10.4.1.10) through the tunnel, but pings to 10.4.1.1 failed.
+- **Root cause:** the ASA refuses to-the-box traffic that arrives on a different interface from the one addressed, and VPN traffic arrives on the outside interface.
+- **Fix:** `management-access inside`.
+- **Lesson:** through-traffic and to-the-box traffic follow different rules on an ASA.

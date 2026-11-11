@@ -152,8 +152,8 @@ Default route: `0.0.0.0/0` via 172.16.5.2 (the ISP). The router masquerades LAN 
 | Rule | Source | Destination | Translation |
 |------|--------|-------------|-------------|
 | 1 (twice NAT, identity) | 10.4.1.0/24 (inside) | 10.2.0.0/24 (outside) | None. Exempts VPN traffic from NAT. |
-| 2 (object NAT, dynamic) | 10.4.1.0/24 (inside) | any | PAT to the outside interface address (172.16.4.1) |
-| 3 (object NAT, dynamic) | 10.4.2.0/24 (dmz) | any | PAT to the outside interface address (172.16.4.1) |
+| 2 (twice NAT, dynamic) | 10.4.1.0/24 (inside) | any | PAT to the outside interface address (172.16.4.1) |
+| 3 (twice NAT, dynamic) | 10.4.2.0/24 (dmz) | any | PAT to the outside interface address (172.16.4.1) |
 
 The DMZ policy (ACL `DMZ-IN`, applied inbound on the dmz interface) denies DMZ traffic to the inside network with logging, and permits ICMP from the DMZ to anywhere else.
 
